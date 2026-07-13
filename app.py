@@ -7,6 +7,7 @@ import streamlit as st
 from datetime import date
 from src.ncr_intelligence.modeling.models import ForecasterModel
 from src.ncr_intelligence.modeling.forecaster import ScenarioForecaster
+from src.ncr_intelligence.modeling.llm_explainer import GroundedAIExplainer
 
 # ----------------------------------------------------
 # 1. PAGE CONFIGURATION & STYLING
@@ -423,20 +424,49 @@ with t4:
     spatial_feats = forecaster.simulate_spatial_features(
         selected_loc_id, metro_a, exp_a, airport_a, rrts_a
     )
-    st.code(f"""
-[CONTEXT LOCALITY] {selected_loc['locality_name']} ({selected_loc['region']})
-[BASELINE PRICE] ₹ {latest_hist_row['price_proxy']:.0f} / sqft
+    
+    digest_data = {
+        "locality_name": selected_loc['locality_name'],
+        "region": selected_loc['region'],
+        "maturity_class": selected_loc['urban_maturity_class'],
+        "baseline_price": f"{latest_hist_row['price_proxy']:.0f}",
+        "metro_stage_a": metro_a,
+        "exp_stage_a": exp_a,
+        "airport_stage_a": airport_a,
+        "price_a": f"{final_a:.0f}",
+        "growth_a": f"{growth_pct:+.2f}",
+        "metro_stage_c": metro_c,
+        "exp_stage_c": exp_c,
+        "airport_stage_c": airport_c,
+        "price_c": f"{final_c:.0f}",
+        "growth_c": f"{growth_c:+.2f}",
+        "metro_dist_a": f"{spatial_feats['distance_nearest_operational_metro_km']:.2f}",
+        "primary_driver": imp_df.iloc[-1]['Feature'],
+        "driver_importance": f"{imp_df.iloc[-1]['Importance (%)']:.2f}",
+        "price_diff": f"{price_diff:.2f}"
+    }
+    
+    # Render prompt digest inside expander
+    with st.expander("Show Raw Structured Prompt Digest"):
+        st.code(f"""
+[CONTEXT LOCALITY] {digest_data['locality_name']} ({digest_data['region']})
+[BASELINE PRICE] ₹ {digest_data['baseline_price']} / sqft
 
 [SCENARIO A PROJECTION]
-- Metro: {metro_a} | Expressway: {exp_a} | Airport: {airport_a}
-- Projected Price (4 Quarters): ₹ {final_a:.0f} / sqft ({growth_pct:+.2f}% shift)
+- Metro: {digest_data['metro_stage_a']} | Expressway: {digest_data['exp_stage_a']} | Airport: {digest_data['airport_stage_a']}
+- Projected Price (4 Quarters): ₹ {digest_data['price_a']} / sqft ({digest_data['growth_a']}% shift)
 
 [SCENARIO C PROJECTION]
-- Metro: {metro_c} | Expressway: {exp_c} | Airport: {airport_c}
-- Projected Price (4 Quarters): ₹ {final_c:.0f} / sqft ({growth_c:+.2f}% shift)
+- Metro: {digest_data['metro_stage_c']} | Expressway: {digest_data['exp_stage_c']} | Airport: {digest_data['airport_stage_c']}
+- Projected Price (4 Quarters): ₹ {digest_data['price_c']} / sqft ({digest_data['growth_c']}% shift)
 
 [MODEL ATTRIBUTION]
-- Proximity gap: Scenario A metro operational distance is {spatial_feats['distance_nearest_operational_metro_km']:.2f} km.
-- Primary feature driver: {imp_df.iloc[-1]['Feature']} contributed {imp_df.iloc[-1]['Importance (%)']:.2f}% to the tree splits.
-- Variance outcome: Scenario A leads Scenario C by ₹ {price_diff:.2f} / sqft.
-    """)
+- Proximity gap: Scenario A metro operational distance is {digest_data['metro_dist_a']} km.
+- Primary feature driver: {digest_data['primary_driver']} contributed {digest_data['driver_importance']}% to the tree splits.
+- Variance outcome: Scenario A leads Scenario C by ₹ {digest_data['price_diff']} / sqft.
+        """)
+        
+    st.markdown("#### Live AI Scenario Report")
+    explainer = GroundedAIExplainer()
+    report = explainer.generate_explanation(digest_data)
+    st.markdown(report)
