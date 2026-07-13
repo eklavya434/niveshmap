@@ -6,6 +6,36 @@ from src.ncr_intelligence.database.connection import engine, Base, get_db_sessio
 from src.ncr_intelligence.database.models import Locality, DataReadinessResult, PropertyPriceObservation
 from src.ncr_intelligence.quality.readiness import ReadinessScorer
 from src.ncr_intelligence.features.infrastructure_features import get_project_stage_at_quarter
+from src.ncr_intelligence.geospatial.spatial_features import NCRGeospatialProcessor
+
+# Projects coordinate reference mappings
+PROJECT_COORDINATES = {
+    "metro_stations": [
+        (28.5818, 77.0592),  # Dwarka Sec 10 Station
+        (28.6186, 77.3719),  # Noida Sector 62 Station
+        (28.4682, 77.5147),  # Greater Noida Omega 1
+        (28.4664, 77.5092),  # Pari Chowk Station
+        (28.4554, 77.4727),  # Sector 148 Station
+        (28.5996, 77.4497),  # Noida Extension Proposed
+        (28.4907, 77.0984),  # Micromax Moulsari Avenue
+        (28.4721, 77.3168)   # Sarai Station
+    ],
+    "expressways": [
+        (28.5300, 77.3800),  # Noida Expressway
+        (28.6100, 77.3500),  # NH-24 / DME
+        (28.3000, 77.5500),  # Yamuna Expressway
+        (28.4000, 76.9800),  # Dwarka Expressway
+        (28.4800, 77.0800),  # NH-48 Gurugram
+        (28.4300, 77.3300)   # Mathura Road
+    ],
+    "airports": [
+        (28.5562, 77.1000),  # IGI Airport
+        (28.1500, 77.5500)   # Jewar Airport
+    ],
+    "rrts_stations": [
+        (28.7061, 77.4419)   # Guldhar Station
+    ]
+}
 
 # Raw Mock Audit Metrics mapping actual NCR data availability
 AUDIT_METRICS = {
@@ -338,6 +368,7 @@ def run_feasibility_pipeline():
                 quarters.append(f"{year}-Q{q}")
                 
         panel_rows = []
+        geo_processor = NCRGeospatialProcessor()
         for loc in local_data:
             loc_id = loc["locality_id"]
             metrics = AUDIT_METRICS[loc_id]
@@ -382,12 +413,46 @@ def run_feasibility_pipeline():
                 airport_stage = get_project_stage_at_quarter(MOCK_PROJECTS_EVENTS["airport"], qtr) if has_airport else None
                 rrts_stage = get_project_stage_at_quarter(MOCK_PROJECTS_EVENTS["metro"], qtr) if has_rrts else None # reuse metro events as mock
                 
-                # Calculate coordinates and spatial features (distances in km)
-                # Mock distances: emerging ones have higher initial distances that change if a project becomes operational
-                dist_metro = 1.2 if metro_stage == "OPERATIONAL" else 8.5
-                dist_expressway = 0.8 if expressway_stage == "OPERATIONAL" else 4.0
-                dist_airport = 15.0 if airport_stage == "OPERATIONAL" else 45.0
-                dist_rrts = 2.5 if rrts_stage == "OPERATIONAL" else 12.0
+                # Calculate coordinates and spatial features dynamically using live geospatial processing
+                op_metro = []
+                prop_metro = []
+                
+                # Check status of each metro station
+                for station in PROJECT_COORDINATES["metro_stations"]:
+                    if station == (28.5996, 77.4497):  # Noida Extension station
+                        if metro_stage == "OPERATIONAL":
+                            op_metro.append(station)
+                        elif metro_stage != "NONE":
+                            prop_metro.append(station)
+                    else:
+                        op_metro.append(station)
+                        
+                op_exp = []
+                for exp in PROJECT_COORDINATES["expressways"]:
+                    if exp == (28.4000, 76.9800):  # Dwarka Expressway
+                        if expressway_stage == "OPERATIONAL":
+                            op_exp.append(exp)
+                    else:
+                        op_exp.append(exp)
+                        
+                op_airport = [(28.5562, 77.1000)]  # IGI is always operational
+                if airport_stage == "OPERATIONAL":
+                    op_airport.append((28.1500, 77.5500))  # Jewar Airport active
+                    
+                op_rrts = []
+                if has_rrts and rrts_stage == "OPERATIONAL":
+                    op_rrts.append((28.7061, 77.4419))  # Guldhar RRTS station
+                    
+                transit_infrastructure_coords = {
+                    "operational_metro": op_metro,
+                    "proposed_metro": prop_metro,
+                    "expressway": op_exp,
+                    "airport": op_airport,
+                    "rrts": op_rrts
+                }
+                
+                centroid = (loc["latitude"], loc["longitude"])
+                spatial_feats = geo_processor.generate_locality_spatial_features(centroid, transit_infrastructure_coords)
                 
                 panel_rows.append({
                     "locality_id": loc_id,
@@ -401,14 +466,14 @@ def run_feasibility_pipeline():
                     "expressway_stage": expressway_stage or "NONE",
                     "airport_stage": airport_stage or "NONE",
                     "rrts_stage": rrts_stage or "NONE",
-                    "distance_nearest_operational_metro_km": round(dist_metro, 2),
-                    "distance_nearest_proposed_metro_km": round(dist_metro + 3.0, 2),
-                    "distance_nearest_expressway_km": round(dist_expressway, 2),
-                    "distance_airport_km": round(dist_airport, 2),
-                    "distance_rrts_station_km": round(dist_rrts, 2),
-                    "infra_count_3km": 2 if metro_stage == "OPERATIONAL" else 0,
-                    "infra_count_5km": 3 if expressway_stage == "OPERATIONAL" else 1,
-                    "infra_count_10km": 5,
+                    "distance_nearest_operational_metro_km": round(spatial_feats["distance_nearest_operational_metro_km"], 2),
+                    "distance_nearest_proposed_metro_km": round(spatial_feats["distance_nearest_proposed_metro_km"], 2),
+                    "distance_nearest_expressway_km": round(spatial_feats["distance_nearest_expressway_km"], 2),
+                    "distance_airport_km": round(spatial_feats["distance_airport_km"], 2),
+                    "distance_rrts_station_km": round(spatial_feats["distance_rrts_station_km"], 2),
+                    "infra_count_3km": spatial_feats["infra_count_3km"],
+                    "infra_count_5km": spatial_feats["infra_count_5km"],
+                    "infra_count_10km": spatial_feats["infra_count_10km"],
                     "rera_project_count": 12 if "NOI" in loc_id else 4,
                     "data_readiness_score": readiness_info["data_readiness_score"]
                 })
