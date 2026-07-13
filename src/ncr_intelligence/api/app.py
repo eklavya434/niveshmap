@@ -29,4 +29,9 @@ def create_app(
     )
     configure_spatial_service(app, service_factory=service_factory)
     app.include_router(map_routes.router)
+
+    @app.get("/health")
+    def health_check():
+        return {"status": "ok"}
+
     return app

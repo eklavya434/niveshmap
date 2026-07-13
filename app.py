@@ -167,8 +167,10 @@ INFRA_METADATA = {
     (28.7061, 77.4419): {"name": "Guldhar RRTS Station", "type": "RRTS", "details": "Operational RapidX/RRTS station serving Raj Nagar Extension."}
 }
 
+API_BASE_URL = os.environ.get("NIVESHMAP_API_URL", "http://localhost:8000")
+
 def query_map_cells(min_lat, min_lon, max_lat, max_lon, quarter=None):
-    url = "http://localhost:8000/api/map/cells"
+    url = f"{API_BASE_URL}/api/map/cells"
     params = {
         "min_lat": str(min_lat),
         "min_lon": str(min_lon),
@@ -192,7 +194,7 @@ def query_map_cells(min_lat, min_lon, max_lat, max_lon, quarter=None):
         return {"cells": [], "returned_cells": 0}
 
 def query_map_cell(lat, lon, quarter=None, scenario=None):
-    url = "http://localhost:8000/api/map/cell"
+    url = f"{API_BASE_URL}/api/map/cell"
     params = {
         "lat": str(lat),
         "lon": str(lon)
