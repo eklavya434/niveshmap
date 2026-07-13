@@ -1,0 +1,38 @@
+weights:
+  historical_price_coverage: 0.20
+  price_source_quality: 0.15
+  quarterly_observation_depth: 0.15
+  infrastructure_event_history: 0.15
+  infrastructure_evidence_coverage: 0.10
+  geospatial_completeness: 0.10
+  historical_analogue_depth: 0.05
+  socioeconomic_feature_completeness: 0.10
+
+thresholds:
+  min_quarters_full_forecast: 20
+  preferred_quarters_full_forecast: 28
+  max_missing_quarter_pct_full_forecast: 20.0
+  min_quarters_limited_forecast: 12
+  min_infra_reconstructable_events: 1
+  min_readiness_score_full: 75.0
+  min_readiness_score_limited: 50.0
+  min_readiness_score_intel_only: 30.0
+
+hard_gates:
+  require_price_provenance: true
+  min_price_observations_count: 12
+  require_temporal_infra_reconstruction: true
+
+classifications:
+  FULL_FORECAST_ELIGIBLE:
+    name: "Full Scenario Forecast Eligible"
+    eligibility: "High confidence scenario projections allowed."
+  LIMITED_FORECAST_ELIGIBLE:
+    name: "Limited / High-Uncertainty Forecast Eligible"
+    eligibility: "Restricted projections with wider uncertainty bounds."
+  INTELLIGENCE_ONLY:
+    name: "Infrastructure Intelligence & Historical Analogue Only"
+    eligibility: "No forecast. Displays local trends and nearest projects only."
+  INSUFFICIENT_COVERAGE:
+    name: "Insufficient Analytical Coverage"
+    eligibility: "Excluded from all analytical outputs."

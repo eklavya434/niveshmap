@@ -1,0 +1,168 @@
+- source_id: nhb_residex
+  source_name: "NHB RESIDEX"
+  source_category: "baseline"
+  geography: "National / NCR"
+  official_source: true
+  access_method: "html"
+  expected_format: "xlsx"
+  historical_depth_notes: "Quarterly index data since 2013/2018 for major NCR cities (Delhi, Noida, Gurugram, Faridabad)."
+  legal_access_notes: "Publicly available on National Housing Bank website for download."
+  adapter: "NHBResidexAdapter"
+  status: "not_audited"
+  notes: "Tracks housing price index (HPI) based on both assessment prices and market prices."
+
+- source_id: up_rera
+  source_name: "UP RERA Project Disclosures"
+  source_category: "rera"
+  geography: "Uttar Pradesh"
+  official_source: true
+  access_method: "html"
+  expected_format: "html"
+  historical_depth_notes: "Project registrations and quarterly progress reports since ~2017."
+  legal_access_notes: "Public search portal, protected by CAPTCHAs for detail pages."
+  adapter: "UPRERAAdapter"
+  status: "not_audited"
+  notes: "Contains cost, size, pricing proxy details for registered residential projects."
+
+- source_id: hrera_gurugram
+  source_name: "Haryana RERA Gurugram"
+  source_category: "rera"
+  geography: "Haryana"
+  official_source: true
+  access_method: "html"
+  expected_format: "html"
+  historical_depth_notes: "Project registration filings since 2017/2018."
+  legal_access_notes: "Public portal. Scripting requires navigating JS-rendered grids."
+  adapter: "HRERAGurugramAdapter"
+  status: "not_audited"
+  notes: "Covers Gurugram district projects."
+
+- source_id: hrera_panchkula
+  source_name: "Haryana RERA Panchkula Jurisdiction"
+  source_category: "rera"
+  geography: "Haryana"
+  official_source: true
+  access_method: "html"
+  expected_format: "html"
+  historical_depth_notes: "Project registration filings since 2017/2018."
+  legal_access_notes: "Public portal. Separate website from Gurugram."
+  adapter: "HRERAPanchkulaAdapter"
+  status: "not_audited"
+  notes: "Covers Faridabad and other Haryana NCR districts."
+
+- source_id: delhi_rera
+  source_name: "Delhi RERA"
+  source_category: "rera"
+  geography: "Delhi"
+  official_source: true
+  access_method: "html"
+  expected_format: "html"
+  historical_depth_notes: "Project filings from 2018 onwards."
+  legal_access_notes: "Public portal. Low project density compared to Noida/Gurugram."
+  adapter: "DelhiRERAAdapter"
+  status: "not_audited"
+  notes: "Delhi real estate is dominated by DDA and standalone redevelopment rather than large RERA projects."
+
+- source_id: delhi_circle_rates
+  source_name: "Delhi Government Circle Rates"
+  source_category: "circle_rates"
+  geography: "Delhi"
+  official_source: true
+  access_method: "pdf"
+  expected_format: "pdf"
+  historical_depth_notes: "Periodic notifications (e.g. 2014, 2021 reductions)."
+  legal_access_notes: "Published via official gazettes/PDFs on Delhi Revenue website."
+  adapter: "DelhiCircleRatesAdapter"
+  status: "not_audited"
+  notes: "Categorized by locality category (A to H). Requires mapping categories to candidate localities."
+
+- source_id: up_circle_rates
+  source_name: "Uttar Pradesh Circle Rates (IGRS UP)"
+  source_category: "circle_rates"
+  geography: "Uttar Pradesh"
+  official_source: true
+  access_method: "manual_download"
+  expected_format: "pdf"
+  historical_depth_notes: "Annual or biennial updates by district magistrates (Noida, Ghaziabad)."
+  legal_access_notes: "Public PDFs published on district/IGRS websites."
+  adapter: "UPCircleRatesAdapter"
+  status: "not_audited"
+  notes: "Requires manual retrieval per district (Gautam Buddha Nagar, Ghaziabad) and text extraction."
+
+- source_id: haryana_collector_rates
+  source_name: "Haryana Collector Rates"
+  source_category: "circle_rates"
+  geography: "Haryana"
+  official_source: true
+  access_method: "manual_download"
+  expected_format: "pdf"
+  historical_depth_notes: "Annual updates by district administrations (Gurugram, Faridabad)."
+  legal_access_notes: "Available on district portals."
+  adapter: "HaryanaCollectorRatesAdapter"
+  status: "not_audited"
+  notes: "Collector rates vary by sector/village. Highly localized."
+
+- source_id: pib_news
+  source_name: "Press Information Bureau (PIB)"
+  source_category: "infrastructure"
+  geography: "National / NCR"
+  official_source: true
+  access_method: "api"
+  expected_format: "json"
+  historical_depth_notes: "Archived cabinet approvals and project status reports since early 2000s."
+  legal_access_notes: "Public API/search search.pib.gov.in."
+  adapter: "PIBAdapter"
+  status: "not_audited"
+  notes: "Excellent for establishing official project approval dates and event timelines."
+
+- source_id: dmrc_metro
+  source_name: "Delhi Metro Rail Corporation (DMRC)"
+  source_category: "infrastructure"
+  geography: "Delhi / NCR"
+  official_source: true
+  access_method: "html"
+  expected_format: "html"
+  historical_depth_notes: "Phase details and history page."
+  legal_access_notes: "Public site."
+  adapter: "DMRCAdapter"
+  status: "not_audited"
+  notes: "DMRC covers Delhi and extensions to Noida, Ghaziabad, Gurugram, Faridabad."
+
+- source_id: nmrc_metro
+  source_name: "Noida Metro Rail Corporation (NMRC)"
+  source_category: "infrastructure"
+  geography: "Noida / Greater Noida"
+  official_source: true
+  access_method: "html"
+  expected_format: "html"
+  historical_depth_notes: "Aqua Line details and extensions."
+  legal_access_notes: "Public site."
+  adapter: "NMRCAdapter"
+  status: "not_audited"
+  notes: "Tracks Aqua line history."
+
+- source_id: ncrtc_rrts
+  source_name: "National Capital Region Transport Corporation (NCRTC)"
+  source_category: "infrastructure"
+  geography: "NCR"
+  official_source: true
+  access_method: "html"
+  expected_format: "html"
+  historical_depth_notes: "Delhi-Meerut RRTS project details."
+  legal_access_notes: "Public site."
+  adapter: "NCRTCAdapter"
+  status: "not_audited"
+  notes: "Tracks Namo Bharat progress."
+
+- source_id: nhai_projects
+  source_name: "NHAI / MoRTH Projects"
+  source_category: "infrastructure"
+  geography: "National / NCR"
+  official_source: true
+  access_method: "html"
+  expected_format: "html"
+  historical_depth_notes: "MoRTH/NHAI annual reports and project dashboards."
+  legal_access_notes: "Publicly accessible."
+  adapter: "NHAIAdapter"
+  status: "not_audited"
+  notes: "Covers Dwarka Expressway, Yamuna Expressway, FNG, Delhi-Dehradun, etc."

@@ -1,0 +1,26 @@
+[
+  {
+    "project_id": "dmrc_blue_ext",
+    "project_name": "Delhi Metro Blue Line Sector 62 Extension",
+    "project_type": "METRO",
+    "primary_authority": "DMRC",
+    "stage": "OPERATIONAL",
+    "raw_stage_text": "Sector 62 Noida metro extension begins passenger service",
+    "event_date": "2019-03-09",
+    "article_publish_date": "2019-03-10",
+    "evidence_strength": 1.00,
+    "evidence_phrase": "Honble PM inaugurated the metro corridor extending to Sector 62"
+  },
+  {
+    "project_id": "ncrtc_delhi_meerut",
+    "project_name": "Delhi Meerut RRTS Corridor",
+    "project_type": "RRTS",
+    "primary_authority": "NCRTC",
+    "stage": "UNDER_CONSTRUCTION",
+    "raw_stage_text": "NCRTC begins civil construction work for Namo Bharat route",
+    "event_date": "2019-06-01",
+    "article_publish_date": "2019-06-03",
+    "evidence_strength": 0.90,
+    "evidence_phrase": "Civil works contract awarded and piling has commenced"
+  }
+]

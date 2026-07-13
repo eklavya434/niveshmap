@@ -1,0 +1,18 @@
+[
+  {
+    "reg_no": "HR-GG-2018-05",
+    "project_name": "Gurugram Central 82",
+    "promoter": "DLF Residential Pvt Ltd",
+    "district": "Gurugram",
+    "cost_disclosed": "3500000000",
+    "price_disclosed": "7200"
+  },
+  {
+    "reg_no": "HR-GG-2019-12",
+    "project_name": "Neharpar Parkview",
+    "promoter": "BPTP Ltd",
+    "district": "Faridabad",
+    "cost_disclosed": "1500000000",
+    "price_disclosed": "4200"
+  }
+]

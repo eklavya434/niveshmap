@@ -1,0 +1,20 @@
+[
+  {
+    "reg_no": "PRJ12345",
+    "project_name": "Nivesh Sectors Premium",
+    "name": "Nivesh Sectors Premium",
+    "promoter": "Nivesh Developers Ltd",
+    "estimated_cost": 250000000.00,
+    "price_per_sqft": "6500",
+    "registration_date": "2018-06-15"
+  },
+  {
+    "reg_no": "PRJ67890",
+    "project_name": "Extension Heights Noida",
+    "name": "Extension Heights Noida",
+    "promoter": "NCR Builders Group",
+    "estimated_cost": 450000000.00,
+    "price_per_sqft": "4800",
+    "registration_date": "2020-03-20"
+  }
+]

@@ -1,0 +1,231 @@
+- locality_id: DEL_DWR_SEC10
+  locality_name: "Dwarka Sector 10"
+  region: "Delhi"
+  state_or_ut: "Delhi"
+  district: "South West Delhi"
+  locality_type: "Sector"
+  latitude: 28.5818
+  longitude: 77.0592
+  urban_maturity_class: "MATURE"
+  candidate_exposure_types:
+    - metro
+    - airport
+  candidate_control_group: false
+  notes: "Mature residential area with operational Blue Line metro and proximity to IGI Airport."
+
+- locality_id: DEL_VK_SEC_A
+  locality_name: "Vasant Kunj Sector A"
+  region: "Delhi"
+  state_or_ut: "Delhi"
+  district: "South Delhi"
+  locality_type: "Sector"
+  latitude: 28.5293
+  longitude: 77.1626
+  urban_maturity_class: "MATURE"
+  candidate_exposure_types:
+    - airport
+  candidate_control_group: true
+  notes: "High-end mature area near airport, serve as baseline/control for metro exposure (nearest metro is relatively far compared to Dwarka)."
+
+- locality_id: NOI_SEC62
+  locality_name: "Sector 62 Noida"
+  region: "Noida"
+  state_or_ut: "Uttar Pradesh"
+  district: "Gautam Buddha Nagar"
+  locality_type: "Sector"
+  latitude: 28.6186
+  longitude: 77.3719
+  urban_maturity_class: "MATURE"
+  candidate_exposure_types:
+    - metro
+    - expressway
+  candidate_control_group: false
+  notes: "Major institutional and residential hub, operational Blue Line branch metro, near NH-24."
+
+- locality_id: NOI_SEC150
+  locality_name: "Sector 150 Noida"
+  region: "Noida"
+  state_or_ut: "Uttar Pradesh"
+  district: "Gautam Buddha Nagar"
+  locality_type: "Sector"
+  latitude: 28.4554
+  longitude: 77.4727
+  urban_maturity_class: "EMERGING"
+  candidate_exposure_types:
+    - expressway
+    - metro
+  candidate_control_group: false
+  notes: "Emerging premium sector along Noida-Greater Noida Expressway, metro connection via Sector 148."
+
+- locality_id: GRN_OMEGA1
+  locality_name: "Omega 1 Greater Noida"
+  region: "Greater Noida"
+  state_or_ut: "Uttar Pradesh"
+  district: "Gautam Buddha Nagar"
+  locality_type: "Sector"
+  latitude: 28.4682
+  longitude: 77.5147
+  urban_maturity_class: "TRANSITIONAL"
+  candidate_exposure_types:
+    - metro
+  candidate_control_group: false
+  notes: "Residential sector in Greater Noida, operational Aqua Line metro."
+
+- locality_id: GRN_PARICHOWK
+  locality_name: "Pari Chowk"
+  region: "Greater Noida"
+  state_or_ut: "Uttar Pradesh"
+  district: "Gautam Buddha Nagar"
+  locality_type: "Chowk/Hub"
+  latitude: 28.4664
+  longitude: 77.5092
+  urban_maturity_class: "MATURE"
+  candidate_exposure_types:
+    - metro
+    - expressway
+  candidate_control_group: false
+  notes: "Gateway to Greater Noida, high traffic connectivity, operational Aqua Line."
+
+- locality_id: GNW_SEC4
+  locality_name: "Sector 4 Greater Noida West"
+  region: "Greater Noida West"
+  state_or_ut: "Uttar Pradesh"
+  district: "Gautam Buddha Nagar"
+  locality_type: "Sector"
+  latitude: 28.5996
+  longitude: 77.4497
+  urban_maturity_class: "EMERGING"
+  candidate_exposure_types:
+    - metro
+  candidate_control_group: false
+  notes: "High density residential hub, metro proposed/pending cabinet approval."
+
+- locality_id: GNW_SEC1
+  locality_name: "Sector 1 Greater Noida West"
+  region: "Greater Noida West"
+  state_or_ut: "Uttar Pradesh"
+  district: "Gautam Buddha Nagar"
+  locality_type: "Sector"
+  latitude: 28.6174
+  longitude: 77.4646
+  urban_maturity_class: "EMERGING"
+  candidate_exposure_types:
+    - expressway
+  candidate_control_group: true
+  notes: "Emerging residential area, serves as potential control for proposed metro extension in Noida Extension."
+
+- locality_id: YEX_SEC22D
+  locality_name: "Sector 22D YEIDA"
+  region: "Yamuna Expressway / YEIDA / Jewar influence areas"
+  state_or_ut: "Uttar Pradesh"
+  district: "Gautam Buddha Nagar"
+  locality_type: "Sector"
+  latitude: 28.2709
+  longitude: 77.5458
+  urban_maturity_class: "EMERGING"
+  candidate_exposure_types:
+    - expressway
+    - airport
+  candidate_control_group: false
+  notes: "Sector along Yamuna Expressway, significant exposure to upcoming Jewar Noida International Airport."
+
+- locality_id: YEX_SEC19
+  locality_name: "Sector 19 YEIDA"
+  region: "Yamuna Expressway / YEIDA / Jewar influence areas"
+  state_or_ut: "Uttar Pradesh"
+  district: "Gautam Buddha Nagar"
+  locality_type: "Sector"
+  latitude: 28.3283
+  longitude: 77.5369
+  urban_maturity_class: "EMERGING"
+  candidate_exposure_types:
+    - expressway
+  candidate_control_group: true
+  notes: "Slightly further north from airport site, useful comparison control for direct Jewar airport distance gradient."
+
+- locality_id: GZB_INDIRAPURAM
+  locality_name: "Indirapuram"
+  region: "Ghaziabad"
+  state_or_ut: "Uttar Pradesh"
+  district: "Ghaziabad"
+  locality_type: "Township"
+  latitude: 28.6365
+  longitude: 77.3732
+  urban_maturity_class: "MATURE"
+  candidate_exposure_types:
+    - metro
+    - expressway
+  candidate_control_group: false
+  notes: "Densely populated township, near NH-24, depends on Noida/Delhi border metro stations."
+
+- locality_id: GZB_RZNEXT
+  locality_name: "Raj Nagar Extension"
+  region: "Ghaziabad"
+  state_or_ut: "Uttar Pradesh"
+  district: "Ghaziabad"
+  locality_type: "Township"
+  latitude: 28.7061
+  longitude: 77.4419
+  urban_maturity_class: "TRANSITIONAL"
+  candidate_exposure_types:
+    - rrts
+    - expressway
+  candidate_control_group: false
+  notes: "Rapidly growing area, high exposure to newly operational RRTS (Guldhar station)."
+
+- locality_id: GUR_DLF3
+  locality_name: "DLF Phase 3"
+  region: "Gurugram"
+  state_or_ut: "Haryana"
+  district: "Gurugram"
+  locality_type: "Subdivision"
+  latitude: 28.4907
+  longitude: 77.0984
+  urban_maturity_class: "MATURE"
+  candidate_exposure_types:
+    - metro
+    - expressway
+  candidate_control_group: false
+  notes: "Highly mature cyber city adjacency, rapid metro and yellow line connections, NH-48 exposure."
+
+- locality_id: GUR_SEC82
+  locality_name: "Sector 82 Gurugram"
+  region: "Gurugram"
+  state_or_ut: "Haryana"
+  district: "Gurugram"
+  locality_type: "Sector"
+  latitude: 28.3986
+  longitude: 76.9692
+  urban_maturity_class: "TRANSITIONAL"
+  candidate_exposure_types:
+    - expressway
+  candidate_control_group: false
+  notes: "New Gurugram area, high exposure to Dwarka Expressway (NH-248BB) and NH-48."
+
+- locality_id: FAR_SEC37
+  locality_name: "Sector 37 Faridabad"
+  region: "Faridabad"
+  state_or_ut: "Haryana"
+  district: "Faridabad"
+  locality_type: "Sector"
+  latitude: 28.4721
+  longitude: 77.3168
+  urban_maturity_class: "MATURE"
+  candidate_exposure_types:
+    - metro
+  candidate_control_group: false
+  notes: "Mature industrial-residential sector bordering Delhi, operational violet line metro."
+
+- locality_id: FAR_SEC82
+  locality_name: "Sector 82 Faridabad"
+  region: "Faridabad"
+  state_or_ut: "Haryana"
+  district: "Faridabad"
+  locality_type: "Sector"
+  latitude: 28.3848
+  longitude: 77.3621
+  urban_maturity_class: "EMERGING"
+  candidate_exposure_types:
+    - expressway
+  candidate_control_group: true
+  notes: "Neharpar emerging area, lower metro connectivity, serves as expressway/growth comparison locality."

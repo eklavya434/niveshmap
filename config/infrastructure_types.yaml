@@ -1,0 +1,33 @@
+infrastructure_types:
+  - id: METRO
+    name: "Metro Rail"
+    description: "Intra-city rapid transit rail networks."
+  - id: RRTS
+    name: "Regional Rapid Transit System"
+    description: "Semi-high-speed rail corridor connecting regional urban centers."
+  - id: EXPRESSWAY_HIGHWAY
+    name: "Expressways and National Highways"
+    description: "Controlled-access highways and primary national highways."
+  - id: AIRPORT
+    name: "International/Domestic Airports"
+    description: "Aviation infrastructure including passenger/cargo airport hubs."
+
+stage_taxonomy:
+  - stage: PROPOSED
+    order: 1
+    description: "Project concept announced, feasibility study, or draft Detailed Project Report (DPR) submitted."
+  - stage: APPROVED
+    order: 2
+    description: "DPR approved by cabinet/authority, or financial sanction granted."
+  - stage: CONTRACTED
+    order: 3
+    description: "Tendering completed, concessionaire/builder selected, and work awarded."
+  - stage: UNDER_CONSTRUCTION
+    order: 4
+    description: "Physical construction started on site."
+  - stage: OPERATIONAL
+    order: 5
+    description: "Project commissioned and open for commercial operations."
+  - stage: STALLED_DELAYED_CANCELLED
+    order: 6
+    description: "Work stopped due to legal, land acquisition, financial, or regulatory issues."

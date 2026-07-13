@@ -1,0 +1,20 @@
+[
+  {
+    "project_name": "Noida International Airport Jewar",
+    "stage": "APPROVED",
+    "raw_stage_text": "Cabinet approvals granted for Jewar Airport DPR",
+    "event_date": "2018-05-10",
+    "article_publish_date": "2018-05-12",
+    "evidence_strength": 0.95,
+    "evidence_phrase": "Union Cabinet has approved the development of Jewar Airport"
+  },
+  {
+    "project_name": "Noida Extension Metro Link",
+    "stage": "PROPOSED",
+    "raw_stage_text": "NMRC submits DPR for Greater Noida West metro extension",
+    "event_date": "2019-02-15",
+    "article_publish_date": "2019-02-16",
+    "evidence_strength": 0.80,
+    "evidence_phrase": "Detailed Project Report for the Noida Extension metro corridor has been submitted"
+  }
+]
