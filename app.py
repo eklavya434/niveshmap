@@ -427,11 +427,17 @@ if st.session_state.app_mode == "🗺️ Explore NCR Map":
             # Infrastructure Proximity
             st.markdown("### 🚆 Infrastructure Proximity")
             infra = cell_info.get("infrastructure", {})
-            st.write(f"**Nearest Operational Metro**: {f'{infra.get(\'nearest_operational_metro_km\')} km' if infra.get('nearest_operational_metro_km') is not None else 'Unavailable'}")
-            st.write(f"**Nearest Proposed Metro**: {f'{infra.get(\'nearest_proposed_metro_km\')} km' if infra.get('nearest_proposed_metro_km') is not None else 'Unavailable'}")
-            st.write(f"**Nearest RRTS Station**: {f'{infra.get(\'nearest_rrts_km\')} km' if infra.get('nearest_rrts_km') is not None else 'Unavailable'}")
-            st.write(f"**Nearest Expressway/Highway**: {f'{infra.get(\'nearest_expressway_highway_km\')} km' if infra.get('nearest_expressway_highway_km') is not None else 'Unavailable'}")
-            st.write(f"**Airport Distance**: {f'{infra.get(\'airport_distance_km\')} km' if infra.get('airport_distance_km') is not None else 'Unavailable'}")
+            m_op = infra.get("nearest_operational_metro_km")
+            m_pr = infra.get("nearest_proposed_metro_km")
+            rrt = infra.get("nearest_rrts_km")
+            exp = infra.get("nearest_expressway_highway_km")
+            arp = infra.get("airport_distance_km")
+
+            st.write(f"**Nearest Operational Metro**: {m_op:.2f} km" if m_op is not None else "**Nearest Operational Metro**: Unavailable")
+            st.write(f"**Nearest Proposed Metro**: {m_pr:.2f} km" if m_pr is not None else "**Nearest Proposed Metro**: Unavailable")
+            st.write(f"**Nearest RRTS Station**: {rrt:.2f} km" if rrt is not None else "**Nearest RRTS Station**: Unavailable")
+            st.write(f"**Nearest Expressway/Highway**: {exp:.2f} km" if exp is not None else "**Nearest Expressway/Highway**: Unavailable")
+            st.write(f"**Airport Distance**: {arp:.2f} km" if arp is not None else "**Airport Distance**: Unavailable")
             
             # Analytical Readiness
             st.markdown("### 📊 Analytical Readiness")
