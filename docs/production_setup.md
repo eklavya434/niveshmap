@@ -21,6 +21,12 @@ To initialize database schemas in PostgreSQL, run:
 psql -h $DB_HOST -U $DB_USER -d $DB_NAME -f sql/schema.sql
 ```
 
+### Spatial Intelligence / PostGIS requirement
+
+The development default remains SQLite and stores portable WKT cell geometry. A production PostgreSQL deployment that enables the spatial map must next apply `sql/migrations/001_spatial_price_intelligence.sql` with a role that can execute `CREATE EXTENSION postgis`.
+
+The repository has no deployment-provider configuration, so PostGIS support is **not verified**. Confirm extension availability, migration privileges, backups, and GiST-index support in the target provider before declaring the spatial layer production-ready. After the baseline locality pipeline has loaded `localities`, run `python scripts/build_spatial_layer.py` from the release workflow to seed the configured H3 coverage cells.
+
 ---
 
 ## 2. Ingestion Pipeline Orchestration (Apache Airflow / Cron)

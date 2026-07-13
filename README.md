@@ -33,6 +33,19 @@ There is no centralized, free, or clean historical residential transaction price
 ## Current Project Phase: Phase 0 (Feasibility Audit)
 The initial milestone establishes a reproducible data feasibility pipeline to determine which localities across NCR jurisdictions have sufficient historical price depth and reconstructable infrastructure timelines to be forecasting-eligible.
 
+## Spatial Intelligence Layer
+
+NiveshMap’s spatial layer resolves a map click to an H3 **analytical zone**. It does not value a parcel or assert an exact market value for the clicked plot. Current locality registry entries are centroids rather than verified locality polygons, so cell-to-locality context uses an explicitly labelled nearest-centroid fallback within documented coverage buffers.
+
+The layer exposes map-ready click and viewport operations through `SpatialIntelligenceService`:
+
+- `get_cell(lat, lon, quarter, scenario)` — the contract for `GET /api/map/cell`.
+- `get_cells(min_lat, min_lon, max_lat, max_lon, quarter)` — the contract for `GET /api/map/cells`.
+
+The project is currently Streamlit-first and has no separate HTTP backend. These operations are deliberately transport-neutral so a visual-map agent can mount them without replacing Streamlit. See [the map API contract](docs/map_api_contract.md), [spatial architecture](docs/spatial_architecture.md), and the [spatial audit report](reports/spatial/codex_spatial_layer_report.md).
+
+Price values are blocked unless a locality price signal is explicitly production-verified for spatial serving. The Phase-0 generated panel is synthetic feasibility data and is never served as a spatial price estimate. With the present data, map cells provide zone identity and honest data limitations; verified infrastructure geometry and price signals must be loaded before they can provide infrastructure intelligence or locality-level price signals.
+
 ---
 
 ## Repository Structure
@@ -103,7 +116,7 @@ ncr-real-estate-intelligence/
    ```
 3. **Install Dependencies**:
    ```bash
-   pip install pytest pydantic pyyaml pandas numpy sqlalchemy geopandas shapely rapidfuzz requests beautifulsoup4 lxml
+pip install pytest pydantic pyyaml pandas numpy sqlalchemy geopandas shapely h3 rapidfuzz requests beautifulsoup4 lxml
    ```
 
 ---
@@ -135,6 +148,14 @@ python scripts/build_phase0_dataset.py
 ```bash
 python -m pytest -v
 ```
+
+### 4. Build the Local H3 Cell Cache (after the baseline locality pipeline)
+```bash
+$env:PYTHONPATH="."
+python scripts/build_spatial_layer.py
+```
+
+For PostgreSQL production, apply `sql/migrations/001_spatial_price_intelligence.sql` after the base schema. It enables PostGIS and creates spatial indexes. Do not treat the SQLite cache as proof that a deployment provider supports PostGIS.
 
 ---
 

@@ -1,0 +1,25 @@
+# Spatial Intelligence configuration.  H3 resolution is intentionally held in
+# one file so a future re-grid can be performed reproducibly.
+h3:
+  resolution: 7
+
+supported_area:
+  strategy: LOCALITY_CENTROID_BUFFER
+  buffer_km: 3.0
+  source_name: "NiveshMap Phase 0 locality registry"
+  source_reference: "config/localities.yaml"
+  retrieval_date: "2026-07-13"
+  license_notes: "Project-maintained candidate locality registry; centroids are not locality boundaries."
+
+cell_locality_assignment:
+  method: NEAREST_CENTROID_FALLBACK
+  max_assignment_distance_km: 4.0
+
+features:
+  version: "spatial-v1"
+  metric_crs: "EPSG:32643"
+  require_verified_geometry: true
+  allow_spatial_price_adjustment: false
+
+api:
+  viewport_result_limit: 500
