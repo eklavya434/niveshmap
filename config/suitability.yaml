@@ -1,0 +1,36 @@
+# Configuration for Nivesh Profile, Financial Capacity, and Strategy Suitability Engines
+
+capacity:
+  # Debt Burden Ratio (monthly debt / monthly income) classification thresholds
+  debt_burden_low: 0.20
+  debt_burden_high: 0.45
+
+  # Available Capital thresholds (INR) for scoring capital strength
+  capital_brackets:
+    constrained: 1500000.0    # < 15 Lakhs
+    limited: 4000000.0        # < 40 Lakhs
+    moderate: 8000000.0       # < 80 Lakhs
+    strong: 15000000.0        # < 1.5 Crores
+    very_strong: 30000000.0   # >= 3 Crores
+
+scoring_weights:
+  # Base alignment bonuses
+  goal_alignment_bonus: 35
+  no_home_bonus_for_home_purchase: 25
+
+  # Hard penalties
+  liquidity_penalty_on_land: 45           # Penalty on LAND_APPRECIATION if liquidity requirement is HIGH
+  short_horizon_penalty_on_land: 50       # Penalty on LAND_APPRECIATION if horizon is < 3 years
+  high_debt_penalty_on_home_purchase: 40  # Penalty on HOME_PURCHASE if debt burden is high
+  short_horizon_penalty_on_home: 30       # Penalty on HOME_PURCHASE if horizon is < 3 years
+
+location_matching:
+  # Weights used when matching strategies with location metrics
+  land_appreciation:
+    data_readiness_weight: 0.3
+    scenario_upside_weight: 0.4
+    infra_proximity_weight: 0.3
+  rental_flat:
+    connectivity_weight: 0.5
+    data_readiness_weight: 0.3
+    maturity_weight: 0.2

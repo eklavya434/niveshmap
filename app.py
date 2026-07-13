@@ -10,7 +10,13 @@ import folium
 from streamlit_folium import st_folium
 from src.ncr_intelligence.modeling.models import ForecasterModel
 from src.ncr_intelligence.modeling.forecaster import ScenarioForecaster
-from src.ncr_intelligence.modeling.llm_explainer import GroundedAIExplainer
+from src.ncr_intelligence.modeling.llm_explainer import GroundedAIExplainer, StrategySuitabilityExplainer
+from src.ncr_intelligence.modeling.suitability import (
+    NiveshProfile,
+    FinancialCapacityEngine,
+    StrategySuitabilityEngine,
+    LocationStrategyMatcher
+)
 
 # ----------------------------------------------------
 # 1. PAGE CONFIGURATION & STYLING
@@ -273,14 +279,18 @@ if "map_center" not in st.session_state:
     st.session_state.map_center = [28.5, 77.3]
 if "map_zoom" not in st.session_state:
     st.session_state.map_zoom = 10
+if "profile_submitted" not in st.session_state:
+    st.session_state.profile_submitted = False
+if "nivesh_profile_data" not in st.session_state:
+    st.session_state.nivesh_profile_data = {}
 
 # Main navigation in the sidebar
 with st.sidebar:
     st.title("🏢 NiveshMap Platform")
     app_mode = st.selectbox(
         "Navigation Mode",
-        options=["🗺️ Explore NCR Map", "🔍 Scenario Analyzer"],
-        index=0 if st.session_state.app_mode == "🗺️ Explore NCR Map" else 1
+        options=["🗺️ Explore NCR Map", "🔍 Scenario Analyzer", "👤 Nivesh Profile & Strategy"],
+        index=0 if st.session_state.app_mode == "🗺️ Explore NCR Map" else 1 if st.session_state.app_mode == "🔍 Scenario Analyzer" else 2
     )
     st.session_state.app_mode = app_mode
 
@@ -298,6 +308,23 @@ if st.session_state.app_mode == "🗺️ Explore NCR Map":
             options=search_options,
             format_func=lambda x: "Select Locality..." if x == "None" else f"{forecaster.localities_metadata[x]['locality_name']} ({forecaster.localities_metadata[x]['region']})"
         )
+        
+        # View Mode toggle
+        st.subheader("View Mode")
+        map_view_mode = st.radio("Map View Mode", ["Standard Map", "Personalised View"])
+        
+        if map_view_mode == "Personalised View" and not st.session_state.get("profile_submitted"):
+            st.warning("⚠️ Please complete your Nivesh Profile first to enable Personalised View.")
+            
+        # Strategy Match Legend for Personalised View
+        if map_view_mode == "Personalised View" and st.session_state.get("profile_submitted"):
+            st.markdown("""
+            **🎨 Legend: Strategy Match**
+            - 🟢 **HIGH MATCH** (Score >= 75)
+            - 🔵 **MODERATE MATCH** (Score 45-74)
+            - 🔴 **LOW MATCH** (Score < 45)
+            - ⚪ **INSUFFICIENT DATA**
+            """)
         
         # Layer controls
         st.subheader("Infrastructure Layers")
@@ -339,16 +366,67 @@ if st.session_state.app_mode == "🗺️ Explore NCR Map":
             geom = cell["cell"]["geometry"]
             readiness = cell["cell"]["spatial_readiness"]
             h3_index = cell["cell"]["h3_index"]
+            loc_id = cell["locality"].get("locality_id")
             
-            if readiness == "LOCALITY_ANCHORED_ONLY":
-                color = "#3b82f6"  # Blue
-                fill_opacity = 0.4
-            elif readiness == "INFRASTRUCTURE_INTELLIGENCE_ONLY":
-                color = "#94a3b8"  # Grey
-                fill_opacity = 0.2
+            # Default colors
+            color = "#475569"
+            fill_opacity = 0.1
+            tooltip_band = readiness
+            
+            if map_view_mode == "Personalised View" and st.session_state.get("profile_submitted"):
+                # Get best strategy
+                profile_data = st.session_state.nivesh_profile_data
+                profile = NiveshProfile(profile_data)
+                capacity_res = FinancialCapacityEngine().evaluate(profile)
+                strategy_scores = StrategySuitabilityEngine().calculate(profile, capacity_res)
+                best_strategy = strategy_scores[0]["strategy"]
+                
+                # Match cell locality
+                if loc_id:
+                    loc_meta = forecaster.localities_metadata.get(loc_id)
+                    loc_readiness = feasibility_df[feasibility_df["locality_id"] == loc_id]
+                    r_row = loc_readiness.iloc[0].to_dict() if not loc_readiness.empty else None
+                    loc_hist = panel_df[panel_df["locality_id"] == loc_id].sort_values("quarter")
+                    l_row = loc_hist.iloc[-1].to_dict() if not loc_hist.empty else None
+                    
+                    upside = None
+                    if l_row:
+                        f_a = forecaster.forecast_scenario(loc_id, "OPERATIONAL", "OPERATIONAL", "UNDER_CONSTRUCTION", "NONE", n_quarters=4, latest_row=l_row)
+                        f_c = forecaster.forecast_scenario(loc_id, "PROPOSED", "OPERATIONAL", "STALLED_DELAYED_CANCELLED", "NONE", n_quarters=4, latest_row=l_row)
+                        if f_a and f_c:
+                            upside = f_a[-1]["forecasted_price_proxy"] - f_c[-1]["forecasted_price_proxy"]
+                            
+                    match = LocationStrategyMatcher().match_locality(best_strategy, loc_meta, r_row, l_row, upside)
+                    band = match["match_band"]
+                    score = match["match_score"]
+                else:
+                    band = "INSUFFICIENT_DATA"
+                    score = 0
+                    
+                if band == "HIGH":
+                    color = "#10b981"  # Green
+                    fill_opacity = 0.5
+                elif band == "MODERATE":
+                    color = "#3b82f6"  # Blue
+                    fill_opacity = 0.35
+                elif band == "LOW":
+                    color = "#ef4444"  # Red
+                    fill_opacity = 0.2
+                else:
+                    color = "#4b5563"  # Grey
+                    fill_opacity = 0.1
+                    
+                tooltip_band = f"Match Score: {score}/100 ({band})"
             else:
-                color = "#475569"  # Dark Grey
-                fill_opacity = 0.1
+                if readiness == "LOCALITY_ANCHORED_ONLY":
+                    color = "#3b82f6"  # Blue
+                    fill_opacity = 0.4
+                elif readiness == "INFRASTRUCTURE_INTELLIGENCE_ONLY":
+                    color = "#94a3b8"  # Grey
+                    fill_opacity = 0.2
+                else:
+                    color = "#475569"  # Dark Grey
+                    fill_opacity = 0.1
                 
             folium.GeoJson(
                 geom,
@@ -358,7 +436,7 @@ if st.session_state.app_mode == "🗺️ Explore NCR Map":
                     "weight": 1.5,
                     "fillOpacity": fill_opacity
                 },
-                tooltip=f"H3 Index: {h3_index} ({readiness})"
+                tooltip=f"H3 Index: {h3_index} ({tooltip_band})"
             ).add_to(m)
             
         # Draw layers
@@ -408,6 +486,55 @@ if st.session_state.app_mode == "🗺️ Explore NCR Map":
             st.write(f"**Region**: {loc.get('region') or 'Unassigned'}")
             st.write(f"**H3 Cell Index**: `{cell_info['cell']['h3_index']}`")
             
+            # Personalised matching panel
+            if map_view_mode == "Personalised View" and st.session_state.get("profile_submitted"):
+                st.markdown("### 👤 Personalised Suitability Match")
+                loc_id = loc.get("locality_id")
+                if loc_id:
+                    # Calculate match
+                    profile_data = st.session_state.nivesh_profile_data
+                    profile = NiveshProfile(profile_data)
+                    capacity_res = FinancialCapacityEngine().evaluate(profile)
+                    strategy_scores = StrategySuitabilityEngine().calculate(profile, capacity_res)
+                    best_strategy = strategy_scores[0]["strategy"]
+                    
+                    loc_meta = forecaster.localities_metadata.get(loc_id)
+                    loc_readiness = feasibility_df[feasibility_df["locality_id"] == loc_id]
+                    r_row = loc_readiness.iloc[0].to_dict() if not loc_readiness.empty else None
+                    loc_hist = panel_df[panel_df["locality_id"] == loc_id].sort_values("quarter")
+                    l_row = loc_hist.iloc[-1].to_dict() if not loc_hist.empty else None
+                    
+                    upside = None
+                    if l_row:
+                        f_a = forecaster.forecast_scenario(loc_id, "OPERATIONAL", "OPERATIONAL", "UNDER_CONSTRUCTION", "NONE", n_quarters=4, latest_row=l_row)
+                        f_c = forecaster.forecast_scenario(loc_id, "PROPOSED", "OPERATIONAL", "STALLED_DELAYED_CANCELLED", "NONE", n_quarters=4, latest_row=l_row)
+                        if f_a and f_c:
+                            upside = f_a[-1]["forecasted_price_proxy"] - f_c[-1]["forecasted_price_proxy"]
+                            
+                    match = LocationStrategyMatcher().match_locality(best_strategy, loc_meta, r_row, l_row, upside)
+                    
+                    st.write(f"**Best Strategy**: {best_strategy.replace('_', ' ')}")
+                    st.write(f"**Match Band**: `{match['match_band']}`")
+                    st.write(f"**Match Score**: `{match['match_score']} / 100`")
+                    
+                    st.write("**Why it matches:**")
+                    if match["supporting_factors"]:
+                        for f in match["supporting_factors"]:
+                            st.markdown(f"- {f}")
+                    else:
+                        st.write("No major supporting factors.")
+                        
+                    if match["risk_factors"]:
+                        st.write("**Key Risks:**")
+                        for r in match["risk_factors"]:
+                            st.markdown(f"- ⚠️ {r}")
+                            
+                    if st.button("View Full Analysis"):
+                        st.session_state.app_mode = "👤 Nivesh Profile & Strategy"
+                        st.rerun()
+                else:
+                    st.write("No locality assigned to this cell index. Insufficient data to evaluate strategy match.")
+                    
             # Price Intelligence
             st.markdown("### 💰 Price Intelligence")
             price = cell_info.get("price_intelligence", {})
@@ -505,6 +632,279 @@ if st.session_state.app_mode == "🗺️ Explore NCR Map":
                     st.session_state.selected_loc_id = loc.get("locality_id")
                     st.session_state.app_mode = "🔍 Scenario Analyzer"
                     st.rerun()
+
+elif st.session_state.app_mode == "👤 Nivesh Profile & Strategy":
+    st.title("👤 Nivesh Profile & Strategy Suitability")
+    st.write("Complete your investment profile to receive a personalized real estate strategy analysis and strategy-aligned NCR research areas.")
+
+    # Create a 2-column layout: Left (Questionnaire), Right (Results if submitted)
+    form_col, result_col = st.columns([5, 7])
+
+    with form_col:
+        st.subheader("📋 Nivesh Profile Questionnaire")
+        with st.form("nivesh_profile_form"):
+            occupation = st.selectbox(
+                "Occupation Category",
+                options=["SALARIED_PRIVATE", "SALARIED_GOVERNMENT", "SELF_EMPLOYED", "BUSINESS_OWNER", "FREELANCER", "RETIRED", "OTHER"],
+                index=0,
+                help="Select your primary source of household income."
+            )
+            
+            annual_income = st.number_input(
+                "Annual Household Income (INR)",
+                min_value=0.0,
+                value=1200000.0,
+                step=50000.0,
+                format="%.2f",
+                help="Total gross annual income of your household."
+            )
+            
+            available_capital = st.number_input(
+                "Available Investment Capital (INR)",
+                min_value=0.0,
+                value=3000000.0,
+                step=100000.0,
+                format="%.2f",
+                help="Total liquid funds available for real-estate deployment."
+            )
+            
+            monthly_emi = st.number_input(
+                "Existing Monthly EMI / Debt obligations (INR)",
+                min_value=0.0,
+                value=20000.0,
+                step=5000.0,
+                format="%.2f",
+                help="Current total monthly debt payments."
+            )
+            
+            dependents = st.number_input(
+                "Number of Financial Dependents",
+                min_value=0,
+                value=2,
+                step=1,
+                help="Number of individuals financially dependent on you."
+            )
+            
+            home_ownership = st.selectbox(
+                "Current Home Ownership Status",
+                options=["OWNS_HOME", "DOES_NOT_OWN_HOME", "FAMILY_HOME_OR_OTHER"],
+                index=1
+            )
+            
+            horizon = st.selectbox(
+                "Investment Horizon",
+                options=["LESS_THAN_3_YEARS", "3_TO_5_YEARS", "5_TO_10_YEARS", "MORE_THAN_10_YEARS"],
+                index=1,
+                help="The period you plan to hold the investment before seeking exit."
+            )
+            
+            risk_tolerance = st.selectbox(
+                "Risk Tolerance",
+                options=["LOW", "MODERATE", "HIGH"],
+                index=1
+            )
+            
+            liquidity_requirement = st.selectbox(
+                "Liquidity Requirement",
+                options=["LOW", "MODERATE", "HIGH"],
+                index=1,
+                help="How quickly you might need to convert this investment back into cash."
+            )
+            
+            primary_goal = st.selectbox(
+                "Primary Real-Estate Goal",
+                options=["BUY_HOME_TO_LIVE", "RENTAL_INCOME", "LONG_TERM_APPRECIATION", "BUY_AND_RESELL", "UNSURE"],
+                index=2
+            )
+            
+            submitted = st.form_submit_button("Generate Personalised Strategy")
+            if submitted:
+                # Save to session state
+                st.session_state.nivesh_profile_data = {
+                    "occupation": occupation,
+                    "annual_household_income": annual_income,
+                    "available_investment_capital": available_capital,
+                    "existing_monthly_emi": monthly_emi,
+                    "number_dependents": dependents,
+                    "current_home_ownership": home_ownership,
+                    "investment_horizon": horizon,
+                    "risk_tolerance": risk_tolerance,
+                    "liquidity_requirement": liquidity_requirement,
+                    "primary_real_estate_goal": primary_goal
+                }
+                st.session_state.profile_submitted = True
+                st.success("Profile processed successfully!")
+
+    with result_col:
+        st.subheader("📊 Your Nivesh Analysis")
+        if not st.session_state.get("profile_submitted"):
+            st.info("Fill out and submit the Nivesh Profile questionnaire on the left to see your personalized suitability analysis.")
+        else:
+            profile_data = st.session_state.nivesh_profile_data
+            
+            # 1. Run Engines
+            profile = NiveshProfile(profile_data)
+            capacity_engine = FinancialCapacityEngine()
+            capacity_res = capacity_engine.evaluate(profile)
+            
+            suit_engine = StrategySuitabilityEngine()
+            strategy_scores = suit_engine.calculate(profile, capacity_res)
+            top_strategy = strategy_scores[0]
+            alt_strategy = strategy_scores[1] if len(strategy_scores) > 1 else None
+            
+            # 2. Render Results
+            st.markdown(f"### Best-Aligned Strategy: **{top_strategy['strategy'].replace('_', ' ')}**")
+            st.markdown(f"**Suitability Score**: `{top_strategy['suitability_score']} / 100` (Band: **{top_strategy['suitability_band']}**)")
+            st.caption("*The suitability score measures strategic profile alignment based on transparent capacity, horizon, and goal gates. It is NOT a probability of profit or expected return.*")
+            
+            # Visual strategy comparison using Plotly
+            strat_names = [s["strategy"].replace('_', ' ') for s in strategy_scores]
+            strat_scores = [s["suitability_score"] for s in strategy_scores]
+            fig_strat = go.Figure(go.Bar(
+                x=strat_scores,
+                y=strat_names,
+                orientation="h",
+                marker=dict(color="#3b82f6")
+            ))
+            fig_strat.update_layout(
+                title="Strategy Suitability Comparison Matrix",
+                xaxis_title="Suitability Score (0-100)",
+                yaxis=dict(autorange="reversed"),
+                margin=dict(l=20, r=20, t=40, b=20),
+                height=250,
+                template="plotly_dark",
+                plot_bgcolor="rgba(0,0,0,0)",
+                paper_bgcolor="rgba(0,0,0,0)"
+            )
+            st.plotly_chart(fig_strat, use_container_width=True)
+            
+            # Profile Summary metrics
+            st.write("#### 👤 Profile Summary")
+            p_c1, p_c2, p_c3 = st.columns(3)
+            with p_c1:
+                st.metric("Capacity Class", capacity_res["capacity_class"])
+            with p_c2:
+                st.metric("Debt Burden Class", capacity_res["debt_burden"])
+            with p_c3:
+                st.metric("Goal", profile.primary_goal.replace('_', ' '))
+                
+            # Alignment Factors
+            st.write("#### Why this strategy aligns with you:")
+            if top_strategy["positive_factors"]:
+                for f in top_strategy["positive_factors"]:
+                    st.markdown(f"✅ {f}")
+            if top_strategy["negative_factors"]:
+                for f in top_strategy["negative_factors"]:
+                    st.markdown(f"⚠️ {f}")
+            if top_strategy["major_risks"]:
+                st.markdown("**Major Risks:**")
+                for r in top_strategy["major_risks"]:
+                    st.markdown(f"- 🚨 {r}")
+                    
+            # 3. Location matching
+            st.markdown("---")
+            st.write("#### 🗺️ Potential strategy-aligned NCR research areas:")
+            matcher = LocationStrategyMatcher()
+            
+            matches = []
+            for loc_id in localities_list:
+                loc_meta = forecaster.localities_metadata[loc_id]
+                
+                # Fetch readiness row
+                loc_readiness = feasibility_df[feasibility_df["locality_id"] == loc_id]
+                r_row = loc_readiness.iloc[0].to_dict() if not loc_readiness.empty else None
+                
+                # Fetch latest historical row
+                loc_hist = panel_df[panel_df["locality_id"] == loc_id].sort_values("quarter")
+                l_row = loc_hist.iloc[-1].to_dict() if not loc_hist.empty else None
+                
+                # Compute Scenario Upside
+                upside = None
+                if l_row:
+                    f_a = forecaster.forecast_scenario(loc_id, "OPERATIONAL", "OPERATIONAL", "UNDER_CONSTRUCTION", "NONE", n_quarters=4, latest_row=l_row)
+                    f_c = forecaster.forecast_scenario(loc_id, "PROPOSED", "OPERATIONAL", "STALLED_DELAYED_CANCELLED", "NONE", n_quarters=4, latest_row=l_row)
+                    if f_a and f_c:
+                        upside = f_a[-1]["forecasted_price_proxy"] - f_c[-1]["forecasted_price_proxy"]
+                
+                match = matcher.match_locality(top_strategy["strategy"], loc_meta, r_row, l_row, upside)
+                matches.append(match)
+                
+            # Sort matches by match_score descending
+            matches = sorted(matches, key=lambda x: x["match_score"], reverse=True)
+            
+            # Show top aligned areas
+            has_matches = False
+            for m in matches[:3]:  # Top 3 localities
+                if m["match_band"] == "INSUFFICIENT_DATA" or m["match_band"] == "N/A":
+                    continue
+                has_matches = True
+                with st.expander(f"📍 {m['locality']} ({m['region']}) — Match: {m['match_score']}/100 ({m['match_band']})"):
+                    st.write(f"**Data Readiness**: `{m['data_readiness']}` | **Scenario Sensitivity**: `{m['scenario_dependency']}`")
+                    st.write("**Supporting Factors:**")
+                    for f in m["supporting_factors"]:
+                        st.markdown(f"- {f}")
+                    if m["risk_factors"]:
+                        st.write("**Key Risks:**")
+                        for r in m["risk_factors"]:
+                            st.markdown(f"- ⚠️ {r}")
+                    
+                    # View on Map button
+                    if st.button(f"View {m['locality']} on Map", key=f"btn_map_{m['locality_id']}"):
+                        loc_meta = forecaster.localities_metadata[m['locality_id']]
+                        st.session_state.map_center = [loc_meta["latitude"], loc_meta["longitude"]]
+                        st.session_state.map_zoom = 12
+                        st.session_state.selected_loc_id = m['locality_id']
+                        # Set selected cell data
+                        st.session_state.selected_cell_data = query_map_cell(loc_meta["latitude"], loc_meta["longitude"])
+                        # Toggle view to map
+                        st.session_state.app_mode = "🗺️ Explore NCR Map"
+                        st.rerun()
+                        
+            if not has_matches:
+                st.write("No strong strategy-aligned research areas found in this region.")
+
+            # 4. Alternative Strategy
+            if alt_strategy:
+                st.markdown("---")
+                st.markdown(f"#### 🔄 Alternative Strategy: **{alt_strategy['strategy'].replace('_', ' ')}**")
+                # Explain condition change
+                cond_msg = ""
+                if top_strategy["strategy"] == "LAND_APPRECIATION":
+                    cond_msg = "If liquidity requirement becomes higher or your investment horizon shortens, an established residential strategy (like Rental flat or Home purchase) may align better with your profile."
+                elif top_strategy["strategy"] == "WAIT_AND_ACCUMULATE_CAPITAL":
+                    cond_msg = "Once your available capital accumulates or household income rises, direct property investment (Rental flat or Home purchase) will become viable."
+                else:
+                    cond_msg = "If you decide to target higher long-term wealth growth and can lock in capital for 5+ years, land appreciation will align better."
+                st.write(cond_msg)
+
+            # 5. AI Decision Explainer
+            st.markdown("---")
+            st.write("#### 🧠 AI Analytical Insights")
+            
+            # Instantiate suitability AI explainer
+            ai_explainer = StrategySuitabilityExplainer()
+            with st.spinner("Generating AI suitability explanation..."):
+                report = ai_explainer.generate_explanation(
+                    profile_summary=profile_data,
+                    capacity_result=capacity_res,
+                    strategy_scores=strategy_scores,
+                    top_strategy=top_strategy,
+                    location_matches=matches
+                )
+            st.markdown(report)
+
+            # 6. Methodology Transparency
+            st.markdown("---")
+            st.markdown("### 📘 How your Nivesh Analysis works")
+            st.caption(
+                "NiveshMap combines multiple analytical layers to derive strategic suitability:\n\n"
+                "1. **ML regression models** predict price trajectories based on infrastructure events under high and low progression scenarios.\n"
+                "2. The **Financial Capacity Engine** derives cash-flow parameters (such as debt burden ratio) to establish a capacity category.\n"
+                "3. The **Strategy Suitability Engine** evaluates goal alignment and enforces hard safety/liquidity gates.\n"
+                "4. The **Location Matching Engine** scores localities against strategy characteristics (e.g. proposed transit proximity for appreciation).\n"
+                "5. The **AI layer** explains the structured output and highlights risk factors. It does not calculate or modify scores.\n\n"
+                "*Disclaimer: NiveshMap provides statistical decision support. It does not guarantee returns or provide parcel-level valuation.*"
+            )
 
 elif st.session_state.app_mode == "🔍 Scenario Analyzer":
     # ----------------------------------------------------

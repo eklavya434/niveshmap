@@ -164,3 +164,24 @@ For PostgreSQL production, apply `sql/migrations/001_spatial_price_intelligence.
 * **Phase 2 (Feature Engineering)**: Develop offline geospatial routines in GeoPandas to calculate distances to stations/highways.
 * **Phase 3 (ML Modelling)**: Train ML algorithms (e.g. dynamic regression models or simple GBDTs) on forecasting-eligible panels.
 * **Phase 4 (Dashboard & UI)**: Build the scenario planner in Streamlit.
+* **Phase 5 (Interactive NCR Map)**: Complete spatial viewport coordinate loading, Leaflet visualization layers, and click details drawer.
+* **Phase 6 (Personalised Strategy Suitability)**: Add Nivesh Profile questionnaire, Financial Capacity Engine, Strategy Suitability rules, Location-Strategy Match overlays, and Gemini explainer summaries.
+
+---
+
+## Shipped Features & Capabilities
+
+### 🗺️ Interactive Delhi NCR Map
+- Renders an interactive map of Delhi NCR and its administrative zones.
+- Fetches viewport-restricted H3-7 cells dynamically from the FastAPI backend.
+- Displays infrastructure layers (Metro, RRTS, Expressways, Airports) with simple toggles.
+- Supports locality search to pan, focus, and query click details panels.
+
+### 👤 Nivesh Profile & Strategy Suitability
+- **Nivesh Profile Questionnaire**: Concisely captures household income, available capital, EMI commitments, risk profile, and investment goals.
+- **Financial Capacity Engine**: Derived features (debt burden ratio, capital ratio, dependents load) are mapped to 5 capacity classes (`CONSTRAINED` to `VERY_STRONG`) based on centralized configurations.
+- **Strategy Suitability Engine**: Scrapes and scores 5 core strategies (`HOME_PURCHASE`, `RENTAL_FLAT`, `LAND_APPRECIATION`, `SHORT_TERM_RESALE`, `WAIT_AND_ACCUMULATE_CAPITAL`) using configurable weights and hard gates (e.g. liquidity constraints).
+- **Location Strategy Matcher**: Automatically matches suited strategies against supported localities, penalizing low Data Readiness and marking low-data regions as `INSUFFICIENT_DATA`.
+- **AI Explainer**: Uses Google Gemini (`gemini-1.5-flash`) to generate grounded, cautious, risk-aware suitability comparisons with robust structured markdown fallbacks.
+- **Personalised Map Mode**: Colors the Leaflet map based on the matching bands of the user's best strategy (High, Moderate, Low, Insufficient Data).
+
