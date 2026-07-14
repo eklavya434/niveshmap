@@ -1,0 +1,17 @@
+locality_id,region,historical_quarters_available,missing_quarter_percentage,price_sources_found,price_source_quality,infrastructure_events_found,reconstructable_stage_history,geospatial_completeness,analogue_candidates,data_readiness_score,readiness_class,forecast_eligibility,failure_reasons
+DEL_DWR_SEC10,Delhi,28,0.0,2,80.0,3,YES,YES,2,90.0,FULL_FORECAST_ELIGIBLE,Eligible for full infrastructure scenario forecasting.,
+DEL_VK_SEC_A,Delhi,28,0.0,2,80.0,0,NO,YES,1,69.5,INTELLIGENCE_ONLY,Eligible for historical price trends and analogues only (failed infrastructure event requirements).,Temporal infrastructure reconstruction impossible (no stage transitions found)
+NOI_SEC62,Noida,28,0.0,2,80.0,3,YES,YES,2,90.5,FULL_FORECAST_ELIGIBLE,Eligible for full infrastructure scenario forecasting.,
+NOI_SEC150,Noida,20,10.0,2,75.0,4,YES,YES,3,84.54,FULL_FORECAST_ELIGIBLE,Eligible for full infrastructure scenario forecasting.,
+GRN_OMEGA1,Greater Noida,28,0.0,2,70.0,2,YES,YES,2,84.5,FULL_FORECAST_ELIGIBLE,Eligible for full infrastructure scenario forecasting.,
+GRN_PARICHOWK,Greater Noida,28,0.0,2,75.0,2,YES,YES,2,85.75,FULL_FORECAST_ELIGIBLE,Eligible for full infrastructure scenario forecasting.,
+GNW_SEC4,Greater Noida West,16,15.0,2,70.0,2,YES,YES,2,73.18,LIMITED_FORECAST_ELIGIBLE,Eligible for limited forecasting with wider uncertainty bounds.,
+GNW_SEC1,Greater Noida West,16,15.0,2,70.0,0,NO,YES,1,57.18,INTELLIGENCE_ONLY,Eligible for historical price trends and analogues only (failed infrastructure event requirements).,Temporal infrastructure reconstruction impossible (no stage transitions found)
+YEX_SEC22D,Yamuna Expressway / YEIDA / Jewar influence areas,8,45.0,1,60.0,5,YES,YES,1,69.46,INTELLIGENCE_ONLY,Eligible for infrastructure intelligence only (failed price history requirements).,Insufficient price observation depth (found 8 of min 12 quarters)
+YEX_SEC19,Yamuna Expressway / YEIDA / Jewar influence areas,8,45.0,1,60.0,1,YES,YES,1,55.46,INTELLIGENCE_ONLY,Eligible for infrastructure intelligence only (failed price history requirements).,Insufficient price observation depth (found 8 of min 12 quarters)
+GZB_INDIRAPURAM,Ghaziabad,28,0.0,2,80.0,2,YES,YES,2,86.5,FULL_FORECAST_ELIGIBLE,Eligible for full infrastructure scenario forecasting.,
+GZB_RZNEXT,Ghaziabad,20,10.0,2,75.0,4,YES,YES,2,85.04,FULL_FORECAST_ELIGIBLE,Eligible for full infrastructure scenario forecasting.,
+GUR_DLF3,Gurugram,28,0.0,2,85.0,3,YES,YES,3,90.75,FULL_FORECAST_ELIGIBLE,Eligible for full infrastructure scenario forecasting.,
+GUR_SEC82,Gurugram,20,10.0,2,75.0,3,YES,YES,2,81.54,FULL_FORECAST_ELIGIBLE,Eligible for full infrastructure scenario forecasting.,
+FAR_SEC37,Faridabad,28,0.0,2,75.0,2,YES,YES,1,82.75,FULL_FORECAST_ELIGIBLE,Eligible for full infrastructure scenario forecasting.,
+FAR_SEC82,Faridabad,14,25.0,1,70.0,1,YES,YES,1,64.75,LIMITED_FORECAST_ELIGIBLE,Eligible for limited forecasting with wider uncertainty bounds.,
