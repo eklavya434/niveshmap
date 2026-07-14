@@ -222,4 +222,4 @@ NiveshMap is configured for automated deployment from GitHub to Hugging Face Spa
    - Add a new **Secret** variable: `GEMINI_API_KEY` set to your Google Gemini API key.
    - If not set, NiveshMap falls back gracefully to serving transparent, rules-based strategy summaries.
 
-<!-- Trigger deploy -->
+<!-- Trigger deploy v2 -->
