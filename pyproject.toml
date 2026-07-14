@@ -38,3 +38,6 @@ dependencies = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ncr_intelligence"]
+
+[tool.poetry]
+package-mode = false
