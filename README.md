@@ -196,30 +196,34 @@ For PostgreSQL production, apply `sql/migrations/001_spatial_price_intelligence.
 
 ---
 
-## Deploying on Hugging Face Spaces
+## Deploying on Streamlit Community Cloud
 
-NiveshMap is configured for automated deployment from GitHub to Hugging Face Spaces via GitHub Actions.
+NiveshMap is configured for direct deployment as a single application on [Streamlit Community Cloud](https://share.streamlit.io/).
 
-### Automated Deployment Setup
+### Deployment Setup
 
-1. **Create a new Hugging Face Space**:
-   - Go to Hugging Face Spaces, click **Create new Space**.
-   - Set the Space Name as `niveshmap`.
-   - Select **Docker** as the SDK and choose the **Blank** template.
-2. **Obtain Hugging Face Access Token**:
-   - Go to your Hugging Face Account Settings → **Access Tokens**.
-   - Create a new token with **Write** permission.
-3. **Configure GitHub Secrets**:
-   - Go to your GitHub repository → **Settings** → **Secrets and variables** → **Actions**.
-   - Click **New repository secret**.
-   - Name: `HF_TOKEN`
-   - Value: Paste your Hugging Face write access token. (Do not share or commit this token).
-4. **Trigger Deployment**:
-   - Any push to the `main` branch of this GitHub repository will trigger the GitHub Actions workflow, force-pushing the commit to the Hugging Face Space.
-   - Alternatively, you can run the deployment manually from the **Actions** tab of the GitHub repository by clicking **Run workflow** on the "Deploy to Hugging Face Spaces" workflow.
-5. **Configure Gemini Secret (Optional)**:
-   - On your Hugging Face Space dashboard, go to the **Settings** tab.
-   - Add a new **Secret** variable: `GEMINI_API_KEY` set to your Google Gemini API key.
-   - If not set, NiveshMap falls back gracefully to serving transparent, rules-based strategy summaries.
+1. **Create an Account**: Sign in to [Streamlit Community Cloud](https://share.streamlit.io/) using your GitHub account.
+2. **Deploy New App**:
+   - Click **New app**.
+   - Select your repository: `eklavya434/niveshmap`.
+   - Set Branch: `main`.
+   - Set Main file path: `app.py`.
+3. **Environment Configuration**:
+   - In the Streamlit app deployment settings, navigate to **Secrets**.
+   - Set the spatial access mode to `direct` (runs the spatial engine in-process without a separate FastAPI server):
+     ```toml
+     NIVESHMAP_SPATIAL_MODE = "direct"
+     ```
+   - (Optional) Configure the Google Gemini API key:
+     ```toml
+     GEMINI_API_KEY = "your-actual-api-key"
+     ```
+4. **Click Deploy**: Streamlit will spin up the environment and make the application live on the web.
 
-<!-- Trigger deploy v3 -->
+### Local Development
+
+For local development, you may continue to run NiveshMap using the two-process architecture (FastAPI backend + Streamlit frontend):
+1. Start FastAPI: `.venv\Scripts\python api_server.py`
+2. Start Streamlit (runs by default in `api` mode calling the FastAPI server on port 8000): `streamlit run app.py`
+
+*(Note: Hugging Face Spaces Docker deployment is deprecated in favor of Streamlit Community Cloud deployment).*

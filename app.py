@@ -168,64 +168,23 @@ INFRA_METADATA = {
 }
 
 API_BASE_URL = os.environ.get("NIVESHMAP_API_URL", "http://localhost:8000")
+SPATIAL_MODE = os.environ.get("NIVESHMAP_SPATIAL_MODE", "api").lower()
+
+@st.cache_resource
+def get_spatial_client():
+    from src.ncr_intelligence.geospatial.spatial_client import HTTPSpatialClient, DirectSpatialClient
+    if SPATIAL_MODE == "direct":
+        return DirectSpatialClient()
+    else:
+        return HTTPSpatialClient(API_BASE_URL)
 
 def query_map_cells(min_lat, min_lon, max_lat, max_lon, quarter=None):
-    url = f"{API_BASE_URL}/api/map/cells"
-    params = {
-        "min_lat": str(min_lat),
-        "min_lon": str(min_lon),
-        "max_lat": str(max_lat),
-        "max_lon": str(max_lon)
-    }
-    if quarter:
-        params["quarter"] = quarter
-    try:
-        response = requests.get(url, params=params, timeout=2.0)
-        if response.status_code == 200:
-            return response.json()
-    except Exception:
-        pass
-    
-    try:
-        from src.ncr_intelligence.api.dependencies import build_default_spatial_service
-        service = build_default_spatial_service()
-        return service.get_cells(min_lat, min_lon, max_lat, max_lon, quarter=quarter)
-    except Exception:
-        return {"cells": [], "returned_cells": 0}
+    client = get_spatial_client()
+    return client.get_cells(min_lat, min_lon, max_lat, max_lon, quarter=quarter)
 
 def query_map_cell(lat, lon, quarter=None, scenario=None):
-    url = f"{API_BASE_URL}/api/map/cell"
-    params = {
-        "lat": str(lat),
-        "lon": str(lon)
-    }
-    if quarter:
-        params["quarter"] = quarter
-    if scenario:
-        params["scenario"] = scenario
-    try:
-        response = requests.get(url, params=params, timeout=2.0)
-        if response.status_code == 200:
-            return response.json()
-        elif response.status_code == 422:
-            return {"error": response.json().get("error", {})}
-    except Exception:
-        pass
-        
-    try:
-        from src.ncr_intelligence.api.dependencies import build_default_spatial_service
-        service = build_default_spatial_service()
-        try:
-            return service.get_cell(lat, lon, quarter=quarter, scenario=scenario)
-        except Exception as exc:
-            from src.ncr_intelligence.geospatial.spatial_intelligence import UnsupportedGeographyError, InvalidSpatialPointError
-            if isinstance(exc, UnsupportedGeographyError):
-                return {"error": {"code": "OUTSIDE_SUPPORTED_GEOGRAPHY", "message": str(exc)}}
-            elif isinstance(exc, InvalidSpatialPointError):
-                return {"error": {"code": "INVALID_COORDINATES", "message": str(exc)}}
-            raise
-    except Exception as e:
-        return {"error": {"code": "SPATIAL_LAYER_ERROR", "message": str(e)}}
+    client = get_spatial_client()
+    return client.get_cell(lat, lon, quarter=quarter, scenario=scenario)
 
 def add_infrastructure_markers(m, show_metro, show_rrts, show_expressway, show_airport):
     for coords, meta in INFRA_METADATA.items():
