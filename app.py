@@ -168,7 +168,7 @@ INFRA_METADATA = {
 }
 
 API_BASE_URL = os.environ.get("NIVESHMAP_API_URL", "http://localhost:8000")
-SPATIAL_MODE = os.environ.get("NIVESHMAP_SPATIAL_MODE", "api").lower()
+SPATIAL_MODE = os.environ.get("NIVESHMAP_SPATIAL_MODE", "direct").lower()
 
 @st.cache_resource
 def get_spatial_client():
