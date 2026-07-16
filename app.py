@@ -922,6 +922,9 @@ elif st.session_state.app_mode == "🔍 Scenario Analyzer":
     # ----------------------------------------------------
     # Get latest historical row to serve as baseline
     loc_history = panel_df[panel_df["locality_id"] == st.session_state.selected_loc_id].sort_values("quarter")
+    if loc_history.empty:
+        st.error(f"⚠️ Selected locality '{st.session_state.selected_loc_id}' has no historical observations in the database.")
+        st.stop()
     latest_hist_row = loc_history.iloc[-1].to_dict()
     selected_loc = forecaster.localities_metadata[st.session_state.selected_loc_id]
 
@@ -931,7 +934,11 @@ elif st.session_state.app_mode == "🔍 Scenario Analyzer":
     forecast_c = forecaster.forecast_scenario(st.session_state.selected_loc_id, metro_c, exp_c, airport_c, rrts_c, n_quarters=4, latest_row=latest_hist_row)
 
     # Get feasibility metadata
-    readiness_row = feasibility_df[feasibility_df["locality_id"] == st.session_state.selected_loc_id].iloc[0].to_dict()
+    loc_feasibility = feasibility_df[feasibility_df["locality_id"] == st.session_state.selected_loc_id]
+    if loc_feasibility.empty:
+        st.error(f"⚠️ Selected locality '{st.session_state.selected_loc_id}' has no feasibility metadata in the database.")
+        st.stop()
+    readiness_row = loc_feasibility.iloc[0].to_dict()
 
     # ----------------------------------------------------
     # 6. MAIN CONTENT LAYOUT
